@@ -1,0 +1,16 @@
+{
+  "domain": "fish_tts",
+  "name": "Fish TTS",
+  "codeowners": [
+    "@snyper6pz_rapper"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/tsunami2/fish_tts/",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/tsunami2/fish_tts/issues",
+  "requirements": [
+    "requests>=2.25.1"
+  ],
+  "version": "0.2.2"
+}

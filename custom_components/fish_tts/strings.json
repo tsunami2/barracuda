@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add Fish.audio Text-to-Speech Engine",
+        "description": "Provide configuration data for Fish.audio TTS. See documentation for details.",
+        "data": {
+          "api_key": "Enter your Fish.audio API key (optional if public access is enabled).",
+          "voice_id": "Enter the Voice ID (from Fish.audio voice selection).",
+          "url": "Enter the Fish.audio WebSocket endpoint (default: wss://api.fish.audio/v1/tts/live)."
+        }
+      }
+    },
+    "error": {
+      "wrong_api_key": "Invalid API key. Please enter a valid Fish.audio API key.",
+      "already_configured": "This voice and endpoint are already configured.",
+      "invalid_voice_id": "Invalid Voice ID. Ensure you are using a valid voice reference."
+    },
+    "abort": {
+      "already_configured": "This voice and endpoint are already configured."
+    }
+  }
+}
