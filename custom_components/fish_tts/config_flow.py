@@ -15,9 +15,9 @@ from .const import CONF_API_KEY, CONF_MODEL, CONF_VOICE, CONF_SPEED, CONF_URL, D
 _LOGGER = logging.getLogger(__name__)
 
 def generate_unique_id(user_input: dict) -> str:
-    Generate a unique id from user input."""
+    Generate a unique id from user input.
     url = urlparse(user_input[CONF_URL])
-    return f"{url.hostname}_{user_input[CONF_MODEL]}_{user_input[CONF_VOICE]}"
+    return f"{url.hostname}_{user_input[CONF_MODEL]}_{user_input[CONF_VOICE]}""""
 
 """async def validate_user_input(user_input: dict):
     //Validate user input fields.
@@ -109,7 +109,7 @@ async def validate_user_input(user_input: dict):
     except Exception as e:
         raise ValueError(f"WebSocket connection failed: {str(e)}")
 
-class FishAudioTTSConfigFlow(ConfigFlow, domain=DOMAIN):
+class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
     """Handle a config flow for Fish.audio TTS."""
     VERSION = 1
     data_schema = vol.Schema({
