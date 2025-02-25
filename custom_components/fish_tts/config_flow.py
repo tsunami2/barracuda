@@ -1,4 +1,4 @@
-"""
+#
 from __future__ import annotations
 from typing import Any
 import voluptuous as vol
@@ -70,6 +70,7 @@ class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
                 errors["base"] = "unknown_error"
                 
         return self.async_show_form(step_id="user", data_schema=self.data_schema, errors=errors, description_placeholders=user_input)
+#
 """
 import asyncio
 import websockets
@@ -85,12 +86,12 @@ from .const import CONF_API_KEY, CONF_VOICE, CONF_URL, DOMAIN, UNIQUE_ID
 _LOGGER = logging.getLogger(__name__)
 
 def generate_unique_id(user_input: dict) -> str:
-    """Generate a unique ID based on user input."""
+    #Generate a unique ID based on user input.#
     url = urlparse(user_input[CONF_URL])
     return f"{url.hostname}_{user_input[CONF_VOICE]}"
 
 async def validate_user_input(user_input: dict):
-    """Validate user input fields."""
+    #Validate user input fields.#
     if not user_input.get(CONF_VOICE):
         raise ValueError("Voice is required")
     
@@ -125,7 +126,7 @@ async def validate_user_input(user_input: dict):
         raise ValueError(f"Error occurred while validating connection: {str(e)}")
 
 class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
-    """Handle a config flow for Fish.audio TTS."""
+    #Handle a config flow for Fish.audio TTS.#
     VERSION = 1
     data_schema = vol.Schema({
         vol.Optional(CONF_API_KEY): str,  # API Key is optional
@@ -134,7 +135,7 @@ class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
     })
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
-        """Handle the initial step."""
+        #Handle the initial step.#
         errors = {}
         if user_input is not None:
             try:
@@ -163,3 +164,4 @@ class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
         return self.async_show_form(step_id="user", data_schema=self.data_schema, errors=errors, description_placeholders=user_input)
 
 
+"""
