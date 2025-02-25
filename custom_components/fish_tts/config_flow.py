@@ -23,18 +23,26 @@ async def validate_user_input(user_input: dict):
     """Validate user input fields and test WebSocket connection."""
     if not user_input.get(CONF_VOICE):
         raise ValueError("Voice is required")
-    
-    headers = {
-        "Authorization": f"Bearer {user_input[CONF_API_KEY]}"  # Send API key
-    }
 
     try:
-        async with websockets.connect(user_input[CONF_URL], extra_headers=headers) as ws:
-            await ws.send('{"event": "log", "message": "Test Connection"}')
+        async with websockets.connect(user_input[CONF_URL]) as ws:
+            # Send authentication message with API Key
+            auth_payload = {
+                "event": "authenticate",
+                "token": user_input[CONF_API_KEY]
+            }
+            await ws.send(json.dumps(auth_payload))  # Send API key for auth
+            
+            # Receive server response
             response = await ws.recv()
-            _LOGGER.debug(f"WebSocket test response: {response}")
+            _LOGGER.debug(f"WebSocket auth response: {response}")
+
+            if "unauthorized" in response.lower():
+                raise ValueError("Invalid API Key: 401 Unauthorized")
+
     except Exception as e:
         raise ValueError(f"WebSocket connection failed: {str(e)}")
+
 
 
 class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
