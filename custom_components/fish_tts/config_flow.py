@@ -27,15 +27,28 @@ async def validate_user_input(user_input: dict):
     try:
         async with websockets.connect(
             user_input[CONF_URL],
-            extra_headers={"Authorization": f"Bearer {user_input[CONF_API_KEY]}"}
+            headers={"Authorization": f"Bearer {user_input[CONF_API_KEY]}"}
         ) as ws:
-            auth_payload = {"event": "authenticate"}
-            await ws.send(json.dumps(auth_payload))
+            # Send the "start" event to initialize the session
+            start_payload = {
+                "event": "start",
+                "request": {
+                    "text": "",
+                    "latency": "normal",
+                    "format": "opus",
+                    "reference_id": user_input[CONF_VOICE],
+                },
+            }
+            await ws.send(json.dumps(start_payload))
             response = await ws.recv()
-            _LOGGER.debug(f"WebSocket auth response: {response}")
-            
+            _LOGGER.debug(f"WebSocket start response: {response}")
+
             if "unauthorized" in response.lower():
                 raise ValueError("Invalid API Key: 401 Unauthorized")
+    except websockets.ConnectionClosed as e:
+        raise ValueError(f"WebSocket connection was closed: {e.code} ({e.reason})")
+    except asyncio.TimeoutError:
+        raise ValueError("WebSocket connection timed out")
     except Exception as e:
         raise ValueError(f"WebSocket connection failed: {str(e)}")
 
