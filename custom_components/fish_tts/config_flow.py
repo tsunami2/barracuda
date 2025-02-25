@@ -60,12 +60,11 @@ async def validate_user_input(user_input: dict):
         raise ValueError("WebSocket connection timed out")
     except Exception as e:
         raise ValueError(f"WebSocket connection failed: {str(e)}")
-
 class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
     """Handle a config flow for Fish.audio TTS."""
     VERSION = 1
     data_schema = vol.Schema({
-        vol.Optional(CONF_API_KEY): str,
+        vol.Required(CONF_API_KEY): str,
         vol.Required(CONF_URL, default="wss://api.fish.audio/v1/tts/live"): str,
         vol.Required(CONF_VOICE, default="default-voice"): str
     })
@@ -75,11 +74,18 @@ class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
         errors = {}
         if user_input is not None:
             try:
+                # Validate user input
                 await validate_user_input(user_input)
+
+                # Generate a unique ID for the configuration
                 unique_id = generate_unique_id(user_input)
                 user_input[UNIQUE_ID] = unique_id
+
+                # Check if the unique ID is already configured
                 await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_configured()
+
+                # Parse hostname for the entry title
                 hostname = urlparse(user_input[CONF_URL]).hostname
                 return self.async_create_entry(
                     title=f"Fish.audio TTS ({hostname}, {user_input[CONF_VOICE]})", 
@@ -97,8 +103,13 @@ class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
                 _LOGGER.exception(str(e))
                 errors["base"] = "unknown_error"
         
-        return self.async_show_form(step_id="user", data_schema=self.data_schema, errors=errors, description_placeholders=user_input)
-
+        # Show the form with errors if validation failed
+        return self.async_show_form(
+            step_id="user",
+            data_schema=self.data_schema,
+            errors=errors
+        )
+        
 #
 """
 import asyncio
