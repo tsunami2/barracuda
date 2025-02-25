@@ -34,7 +34,7 @@ async def validate_user_input(user_input: dict):
         raise ValueError(f"WebSocket connection failed: {str(e)}")
 
 class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
-    // Handle a config flow for Fish.audio TTS.
+    # Handle a config flow for Fish.audio TTS.
     VERSION = 1
     data_schema = vol.Schema({
         vol.Optional(CONF_API_KEY): str,  # API Key is optional
@@ -43,7 +43,7 @@ class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
     })
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
-        // Handle the initial step.
+        # Handle the initial step.
         errors = {}
         if user_input is not None:
             try:
