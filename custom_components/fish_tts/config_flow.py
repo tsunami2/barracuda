@@ -19,6 +19,8 @@ def generate_unique_id(user_input: dict) -> str:
     url = urlparse(user_input[CONF_URL])
     return f"{url.hostname}_{user_input[CONF_VOICE]}"
 
+import ormsgpack  # Used for message encoding/decoding in Fish TTS WebSocket API
+
 async def validate_user_input(user_input: dict):
     """Validate user input fields and test WebSocket connection."""
     if not user_input.get(CONF_VOICE):
@@ -29,22 +31,29 @@ async def validate_user_input(user_input: dict):
             user_input[CONF_URL],
             headers={"Authorization": f"Bearer {user_input[CONF_API_KEY]}"}
         ) as ws:
-            # Send the "start" event to initialize the session
+            # Send the "start" event to initialize the TTS session
             start_payload = {
                 "event": "start",
                 "request": {
                     "text": "",
-                    "latency": "normal",
-                    "format": "opus",
-                    "reference_id": user_input[CONF_VOICE],
+                    "latency": "normal",  # Options: "normal" or "balanced"
+                    "format": "opus",    # Options: "opus", "mp3", "wav"
+                    "reference_id": user_input[CONF_VOICE],  # Voice model ID
                 },
             }
-            await ws.send(json.dumps(start_payload))
-            response = await ws.recv()
-            _LOGGER.debug(f"WebSocket start response: {response}")
+            await ws.send(ormsgpack.packb(start_payload))
 
-            if "unauthorized" in response.lower():
+            # Wait for the server's response
+            response = await ws.recv()
+            response_data = ormsgpack.unpackb(response)
+
+            _LOGGER.debug(f"WebSocket start response: {response_data}")
+
+            # Check for errors in the server response
+            if response_data.get("event") == "log" and "unauthorized" in response_data.get("message", "").lower():
                 raise ValueError("Invalid API Key: 401 Unauthorized")
+            elif response_data.get("event") == "finish" and response_data.get("reason") == "error":
+                raise ValueError("Error from Fish TTS server: " + response_data.get("message", "Unknown error"))
     except websockets.ConnectionClosed as e:
         raise ValueError(f"WebSocket connection was closed: {e.code} ({e.reason})")
     except asyncio.TimeoutError:
