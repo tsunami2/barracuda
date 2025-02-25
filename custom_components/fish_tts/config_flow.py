@@ -20,18 +20,22 @@ def generate_unique_id(user_input: dict) -> str:
     return f"{url.hostname}_{user_input[CONF_VOICE]}"
 
 async def validate_user_input(user_input: dict):
-    # Validate user input fields.
+    """Validate user input fields and test WebSocket connection."""
     if not user_input.get(CONF_VOICE):
         raise ValueError("Voice is required")
     
-    # Check WebSocket connectivity
+    headers = {
+        "Authorization": f"Bearer {user_input[CONF_API_KEY]}"  # Send API key
+    }
+
     try:
-        async with websockets.connect(user_input[CONF_URL]) as ws:
+        async with websockets.connect(user_input[CONF_URL], extra_headers=headers) as ws:
             await ws.send('{"event": "log", "message": "Test Connection"}')
             response = await ws.recv()
             _LOGGER.debug(f"WebSocket test response: {response}")
     except Exception as e:
         raise ValueError(f"WebSocket connection failed: {str(e)}")
+
 
 class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
     # Handle a config flow for Fish.audio TTS.
