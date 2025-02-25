@@ -5,6 +5,9 @@ import voluptuous as vol
 import logging
 from urllib.parse import urlparse
 import websockets
+import json
+import asyncio
+import websockets
 
 from homeassistant import data_entry_flow
 from homeassistant.config_entries import ConfigFlow
@@ -19,6 +22,8 @@ def generate_unique_id(user_input: dict) -> str:
     url = urlparse(user_input[CONF_URL])
     return f"{url.hostname}_{user_input[CONF_VOICE]}"
 
+
+
 async def validate_user_input(user_input: dict):
     """Validate user input fields and test WebSocket connection."""
     if not user_input.get(CONF_VOICE):
@@ -29,9 +34,9 @@ async def validate_user_input(user_input: dict):
             # Send authentication message with API Key
             auth_payload = {
                 "event": "authenticate",
-                "token": user_input[CONF_API_KEY]
+                "token": user_input[CONF_API_KEY]  # Send API Key here
             }
-            await ws.send(json.dumps(auth_payload))  # Send API key for auth
+            await ws.send(json.dumps(auth_payload))  # Send auth request
             
             # Receive server response
             response = await ws.recv()
