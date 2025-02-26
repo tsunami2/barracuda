@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import websockets
 import json
 import asyncio
+import ormsgpack  # Used for message encoding/decoding
 from homeassistant import data_entry_flow
 from homeassistant.config_entries import ConfigFlow
 from homeassistant.exceptions import HomeAssistantError
@@ -19,8 +20,6 @@ def generate_unique_id(user_input: dict) -> str:
     url = urlparse(user_input[CONF_URL])
     return f"{url.hostname}_{user_input[CONF_VOICE]}"
 
-import ormsgpack  # Used for message encoding/decoding in Fish TTS WebSocket API
-
 async def validate_user_input(user_input: dict):
     """Validate user input fields and test WebSocket connection."""
     if not user_input.get(CONF_VOICE):
@@ -29,7 +28,7 @@ async def validate_user_input(user_input: dict):
     try:
         async with websockets.connect(
             user_input[CONF_URL],
-            headers={"Authorization": f"Bearer {user_input[CONF_API_KEY]}"}
+            extra_headers=[("Authorization", f"Bearer {user_input[CONF_API_KEY]}")]
         ) as ws:
             # Send the "start" event to initialize the TTS session
             start_payload = {
@@ -54,12 +53,13 @@ async def validate_user_input(user_input: dict):
                 raise ValueError("Invalid API Key: 401 Unauthorized")
             elif response_data.get("event") == "finish" and response_data.get("reason") == "error":
                 raise ValueError("Error from Fish TTS server: " + response_data.get("message", "Unknown error"))
-    except websockets.ConnectionClosed as e:
+    except websockets.exceptions.ConnectionClosed as e:
         raise ValueError(f"WebSocket connection was closed: {e.code} ({e.reason})")
     except asyncio.TimeoutError:
         raise ValueError("WebSocket connection timed out")
     except Exception as e:
         raise ValueError(f"WebSocket connection failed: {str(e)}")
+
 class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
     """Handle a config flow for Fish.audio TTS."""
     VERSION = 1
@@ -109,7 +109,7 @@ class FishAudioTTSConfigFlow(ConfigFlow, domain="fish_tts"):
             data_schema=self.data_schema,
             errors=errors
         )
-        
+
 #
 """
 import asyncio
